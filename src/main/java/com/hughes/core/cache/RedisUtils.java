@@ -2,6 +2,7 @@ package com.hughes.core.cache;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
@@ -14,6 +15,7 @@ public class RedisUtils {
 
 
     public void set(String key, Object value, long timeout, TimeUnit unit) {
+        ValueOperations<String, Object> opsForValue = redisTemplate.opsForValue();
         redisTemplate.opsForValue().set(key, value, timeout, unit);
     }
 
@@ -28,4 +30,9 @@ public class RedisUtils {
     public void delete(String key) {
         redisTemplate.delete(key);
     }
+
+    public Boolean setIfAbsent(String key, Object value, long timeout, TimeUnit unit){
+      return  redisTemplate.opsForValue().setIfAbsent(key, value, timeout, unit);
+    }
+
 }

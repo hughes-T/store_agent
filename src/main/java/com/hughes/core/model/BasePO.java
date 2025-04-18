@@ -8,6 +8,7 @@ import com.hughes.core.user.UserManger;
 import com.hughes.core.utils.StringUtil;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -15,7 +16,7 @@ import java.util.Date;
  * @date 2025/4/18 14:26
  */
 @Data
-public class BasePO {
+public class BasePO implements Serializable {
 
     @JSONField(serializeUsing = ToStringSerializer.class, serialzeFeatures = {SerializerFeature.WriteMapNullValue})
     private Long id;

@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hughes.store_agent.mapper.BasProductPOMapper">
+
+    <resultMap id="BaseResultMap" type="com.hughes.store_agent.pojo.po.BasProductPO">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="status" column="status" jdbcType="CHAR"/>
+            <result property="creatorId" column="creator_id" jdbcType="BIGINT"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="modifyierId" column="modifyier_id" jdbcType="BIGINT"/>
+            <result property="modifyTime" column="modify_time" jdbcType="TIMESTAMP"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="typeId" column="type_id" jdbcType="BIGINT"/>
+            <result property="brand" column="brand" jdbcType="VARCHAR"/>
+            <result property="spec" column="spec" jdbcType="VARCHAR"/>
+            <result property="specUnit" column="spec_unit" jdbcType="VARCHAR"/>
+            <result property="barCode" column="bar_code" jdbcType="VARCHAR"/>
+            <result property="propType" column="prop_type" jdbcType="VARCHAR"/>
+            <result property="picPath" column="pic_path" jdbcType="VARCHAR"/>
+            <result property="flowStatus" column="flow_status" jdbcType="VARCHAR"/>
+            <result property="flowRemark" column="flow_remark" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,status,creator_id,
+        create_time,modifyier_id,modify_time,
+        name,type_id,brand,
+        spec,spec_unit,bar_code,
+        prop_type,pic_path,flow_status,
+        flow_remark
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from bas_product
+        where  id = #{id,jdbcType=BIGINT} 
+    </select>
+
+    <sql id="queryCondition">
+        where t1.status = '1'
+        <if test="id != null">
+            and t1.id = #{id}
+        </if>
+        <if test="flowStatus != null and flowStatus != ''">
+            and t1.flow_status = #{flowStatus}
+        </if>
+        <if test="startDate != null">
+            and t1.create_time >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            <![CDATA[
+                AND t1.create_time < DATE_ADD(#{endDate}, INTERVAL 1 DAY)
+            ]]>
+        </if>
+        <if test="searchKey != null and searchKey != ''">
+            AND t1.name like '%'||#{searchKey}||'%'
+        </if>
+        <if test="brand != null and brand != ''">
+            AND t1.brand like '%'||#{brand}||'%'
+        </if>
+        <if test="barCode != null and barCode != ''">
+            AND t1.bar_code = #{barCode}
+        </if>
+    </sql>
+
+    <select id="queryCount" resultType="java.lang.Integer">
+        select
+            count(1)
+        from bas_product t1
+        <include refid="queryCondition"/>
+    </select>
+
+    <select id="queryList" resultType="com.hughes.store_agent.pojo.vo.ProductVo">
+        select
+        t1.id,
+        t1.name,
+        t1.type_id as "typeId",
+        t2.name as "typeName",
+        t1.brand,
+        t1.spec,
+        t1.specUnit,
+        t1.barCode,
+        t1.propType,
+        t1.picPath,
+        t1.flowStatus,
+        t1.flowRemark
+        from bas_product t1
+        left join bas_product_type t2 on t1.type_id = t2.id
+        <include refid="queryCondition"/>
+        order by t1.create_time desc, t1.id
+        <if test="limit != null">
+            limit #{limit}
+        </if>
+        <if test="offset != null">
+            offset #{offset}
+        </if>
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from bas_product
+        where  id = #{id,jdbcType=BIGINT} 
+    </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.hughes.store_agent.pojo.po.BasProductPO" useGeneratedKeys="true">
+        insert into bas_product
+        ( id,status,creator_id
+        ,create_time,modifyier_id,modify_time
+        ,name,type_id,brand
+        ,spec,spec_unit,bar_code
+        ,prop_type,pic_path,flow_status
+        ,flow_remark)
+        values (#{id,jdbcType=BIGINT},#{status,jdbcType=CHAR},#{creatorId,jdbcType=BIGINT}
+        ,#{createTime,jdbcType=TIMESTAMP},#{modifyierId,jdbcType=BIGINT},#{modifyTime,jdbcType=TIMESTAMP}
+        ,#{name,jdbcType=VARCHAR},#{typeId,jdbcType=BIGINT},#{brand,jdbcType=VARCHAR}
+        ,#{spec,jdbcType=VARCHAR},#{specUnit,jdbcType=VARCHAR},#{barCode,jdbcType=VARCHAR}
+        ,#{propType,jdbcType=VARCHAR},#{picPath,jdbcType=VARCHAR},#{flowStatus,jdbcType=VARCHAR}
+        ,#{flowRemark,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.hughes.store_agent.pojo.po.BasProductPO" useGeneratedKeys="true">
+        insert into bas_product
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="id != null">id,</if>
+                <if test="status != null">status,</if>
+                <if test="creatorId != null">creator_id,</if>
+                <if test="createTime != null">create_time,</if>
+                <if test="modifyierId != null">modifyier_id,</if>
+                <if test="modifyTime != null">modify_time,</if>
+                <if test="name != null">name,</if>
+                <if test="typeId != null">type_id,</if>
+                <if test="brand != null">brand,</if>
+                <if test="spec != null">spec,</if>
+                <if test="specUnit != null">spec_unit,</if>
+                <if test="barCode != null">bar_code,</if>
+                <if test="propType != null">prop_type,</if>
+                <if test="picPath != null">pic_path,</if>
+                <if test="flowStatus != null">flow_status,</if>
+                <if test="flowRemark != null">flow_remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="id != null">#{id,jdbcType=BIGINT},</if>
+                <if test="status != null">#{status,jdbcType=CHAR},</if>
+                <if test="creatorId != null">#{creatorId,jdbcType=BIGINT},</if>
+                <if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
+                <if test="modifyierId != null">#{modifyierId,jdbcType=BIGINT},</if>
+                <if test="modifyTime != null">#{modifyTime,jdbcType=TIMESTAMP},</if>
+                <if test="name != null">#{name,jdbcType=VARCHAR},</if>
+                <if test="typeId != null">#{typeId,jdbcType=BIGINT},</if>
+                <if test="brand != null">#{brand,jdbcType=VARCHAR},</if>
+                <if test="spec != null">#{spec,jdbcType=VARCHAR},</if>
+                <if test="specUnit != null">#{specUnit,jdbcType=VARCHAR},</if>
+                <if test="barCode != null">#{barCode,jdbcType=VARCHAR},</if>
+                <if test="propType != null">#{propType,jdbcType=VARCHAR},</if>
+                <if test="picPath != null">#{picPath,jdbcType=VARCHAR},</if>
+                <if test="flowStatus != null">#{flowStatus,jdbcType=VARCHAR},</if>
+                <if test="flowRemark != null">#{flowRemark,jdbcType=VARCHAR},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hughes.store_agent.pojo.po.BasProductPO">
+        update bas_product
+        <set>
+                <if test="status != null">
+                    status = #{status,jdbcType=CHAR},
+                </if>
+                <if test="creatorId != null">
+                    creator_id = #{creatorId,jdbcType=BIGINT},
+                </if>
+                <if test="createTime != null">
+                    create_time = #{createTime,jdbcType=TIMESTAMP},
+                </if>
+                <if test="modifyierId != null">
+                    modifyier_id = #{modifyierId,jdbcType=BIGINT},
+                </if>
+                <if test="modifyTime != null">
+                    modify_time = #{modifyTime,jdbcType=TIMESTAMP},
+                </if>
+                <if test="name != null">
+                    name = #{name,jdbcType=VARCHAR},
+                </if>
+                <if test="typeId != null">
+                    type_id = #{typeId,jdbcType=BIGINT},
+                </if>
+                <if test="brand != null">
+                    brand = #{brand,jdbcType=VARCHAR},
+                </if>
+                <if test="spec != null">
+                    spec = #{spec,jdbcType=VARCHAR},
+                </if>
+                <if test="specUnit != null">
+                    spec_unit = #{specUnit,jdbcType=VARCHAR},
+                </if>
+                <if test="barCode != null">
+                    bar_code = #{barCode,jdbcType=VARCHAR},
+                </if>
+                <if test="propType != null">
+                    prop_type = #{propType,jdbcType=VARCHAR},
+                </if>
+                <if test="picPath != null">
+                    pic_path = #{picPath,jdbcType=VARCHAR},
+                </if>
+                <if test="flowStatus != null">
+                    flow_status = #{flowStatus,jdbcType=VARCHAR},
+                </if>
+                <if test="flowRemark != null">
+                    flow_remark = #{flowRemark,jdbcType=VARCHAR},
+                </if>
+        </set>
+        where   id = #{id,jdbcType=BIGINT} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hughes.store_agent.pojo.po.BasProductPO">
+        update bas_product
+        set 
+            status =  #{status,jdbcType=CHAR},
+            creator_id =  #{creatorId,jdbcType=BIGINT},
+            create_time =  #{createTime,jdbcType=TIMESTAMP},
+            modifyier_id =  #{modifyierId,jdbcType=BIGINT},
+            modify_time =  #{modifyTime,jdbcType=TIMESTAMP},
+            name =  #{name,jdbcType=VARCHAR},
+            type_id =  #{typeId,jdbcType=BIGINT},
+            brand =  #{brand,jdbcType=VARCHAR},
+            spec =  #{spec,jdbcType=VARCHAR},
+            spec_unit =  #{specUnit,jdbcType=VARCHAR},
+            bar_code =  #{barCode,jdbcType=VARCHAR},
+            prop_type =  #{propType,jdbcType=VARCHAR},
+            pic_path =  #{picPath,jdbcType=VARCHAR},
+            flow_status =  #{flowStatus,jdbcType=VARCHAR},
+            flow_remark =  #{flowRemark,jdbcType=VARCHAR}
+        where   id = #{id,jdbcType=BIGINT} 
+    </update>
+
+    <update id="updateFlow">
+        update bas_product
+        set
+            modifyier_id =  #{modifyierId,jdbcType=BIGINT},
+            modify_time =  #{modifyTime,jdbcType=TIMESTAMP},
+            flow_status =  #{flowStatus,jdbcType=VARCHAR},
+            flow_remark =  #{flowRemark,jdbcType=VARCHAR}
+        where   id = #{id,jdbcType=BIGINT}
+    </update>
+</mapper>
