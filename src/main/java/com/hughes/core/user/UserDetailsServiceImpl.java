@@ -1,4 +1,4 @@
-package com.hughes.core.login;
+package com.hughes.core.user;
 
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,8 +21,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             String encryptedPassword = encoder.encode(password);
             System.out.println("BCrypt加密结果: " + encryptedPassword);
 
-            return new User(username, encryptedPassword,
-                    new ArrayList<>());
+            DealerUser user = new DealerUser(username, password);
+            UserManger.setUserLocal(user);
+            return user;
         } else {
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
