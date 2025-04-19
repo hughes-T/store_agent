@@ -120,8 +120,7 @@ CREATE TABLE bas_product
     type_id      BIGINT COMMENT '商品分类',
     brand        VARCHAR(100) COMMENT '商品品牌',
     spec         VARCHAR(100) COMMENT '商品规格',
-    spec_unit    VARCHAR(32) COMMENT '规格单位',
-    bar_code     VARCHAR(100) COMMENT '零售规格条形码',
+    bar_code     VARCHAR(100) COMMENT '规格条形码',
     prop_type    VARCHAR(32) COMMENT '商品属性 1-普通商品',
     pic_path     VARCHAR(1000) COMMENT '商品图片',
     flow_status  VARCHAR(32) COMMENT '审批状态 1-通过 2-未通过 3-审核中 9-草稿',
@@ -142,6 +141,25 @@ CREATE TABLE bas_product_type
     sort         NUMERIC COMMENT '序号'
 )
     COMMENT '商品分类表';
+
+CREATE TABLE bas_pd_unit
+(
+    id           BIGINT NOT NULL PRIMARY KEY,
+    status       CHAR(1) DEFAULT '1',
+    creator_id   BIGINT,
+    create_time  TIMESTAMP,
+    modifyier_id BIGINT,
+    modify_time  TIMESTAMP,
+    bar_code     VARCHAR(100) COMMENT '规格条形码',
+    pd_id        BIGINT,
+    name         VARCHAR(100) COMMENT '单位名称',
+    code         VARCHAR(100) COMMENT '单位编码',
+    is_base      char(1) COMMENT '是否是基本单位（零售单位）',
+    purchase_price NUMERIC(10, 4) COMMENT '进货价',
+    sale_price NUMERIC(10, 4) COMMENT '零售价',
+    ratio        numeric(28, 8) COMMENT '与基本单位换算系数'
+)
+    COMMENT '商品单位表';
 
 -- 消费者订单表
 CREATE TABLE order_customer
@@ -171,13 +189,27 @@ CREATE TABLE order_customer_detail
     modify_time  TIMESTAMP,
     order_id BIGINT,
     pd_id BIGINT,
+    pd_unit_id BIGINT,
     pd_num NUMERIC(10),
     pd_price NUMERIC(10,4) COMMENT '单价',
     pd_amount NUMERIC(10,4) COMMENT '金额 pd_num * pd_price'
 )
     COMMENT '消费者订单详情表';
 
--- 店铺交易流水 问题5
+-- 店铺交易流水（正常订单、损耗报销等）
+CREATE TABLE bills_flow_store
+(
+    id           BIGINT NOT NULL PRIMARY KEY,
+    status       CHAR(1) DEFAULT '1',
+    creator_id   BIGINT,
+    create_time  TIMESTAMP,
+    modifyier_id BIGINT,
+    modify_time  TIMESTAMP,
+    code         VARCHAR(100) COMMENT '流水号',
+    order_id     BIGINT,
+    amount   NUMERIC(10,4) COMMENT '金额（可为负）'
+)
+    COMMENT '店铺交易流水';
 
 -- 店铺采购订单表
 CREATE TABLE order_store
@@ -189,12 +221,13 @@ CREATE TABLE order_store
     modifyier_id BIGINT,
     modify_time  TIMESTAMP,
     code         VARCHAR(100) COMMENT '订单号',
-    order_status VARCHAR(32) COMMENT '订单状态 1-已完成 2-待付款 3-配送中 4-已取消',
-    pay_type   VARCHAR(32) COMMENT '支付类型 1-微信支付',
+    order_status VARCHAR(32) COMMENT '订单状态 1-已完成 3-配送中 4-已取消',
+    flow_status  VARCHAR(32) COMMENT '审批状态 1-通过 2-未通过 3-审核中 9-草稿',
+    flow_remark  VARCHAR(32) COMMENT '审批备注',
     address_id BIGINT COMMENT '地址',
     store_id BIGINT COMMENT '店铺',
     dealer_id BIGINT COMMENT '经销商ID',
-    order_amount   NUMERIC(10,4) COMMENT '订单金额'
+    order_amount   NUMERIC(10,4) COMMENT '订单总价值'
 )
     COMMENT '店铺采购订单表';
 
@@ -208,9 +241,10 @@ CREATE TABLE order_store_detail
     modifyier_id BIGINT,
     modify_time  TIMESTAMP,
     order_id BIGINT,
+    pd_unit_id BIGINT,
     pd_id BIGINT,
     pd_num NUMERIC(10),
-    pd_price NUMERIC(10,4) COMMENT '单价',
+    pd_price NUMERIC(10,4) COMMENT '实际单价',
     pd_amount NUMERIC(10,4) COMMENT '金额 pd_num * pd_price'
 )
     COMMENT '店铺采购订单详情表';
@@ -224,9 +258,9 @@ CREATE TABLE stock_store_detail
     create_time  TIMESTAMP,
     modifyier_id BIGINT,
     modify_time  TIMESTAMP,
+    pd_unit BIGINT,
     pd_id BIGINT,
-    pd_num NUMERIC(10),
-    pd_price NUMERIC(10,4) COMMENT '单价'
+    pd_num NUMERIC(10)
 )
     COMMENT '店铺库存详情表';
 
